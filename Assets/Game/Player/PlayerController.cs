@@ -1,8 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Game.Player
 {
@@ -11,6 +11,7 @@ namespace Game.Player
     {
         [SerializeField] private Transform _obstacleRayRight = null;
         [SerializeField] private Transform _obstacleRayLeft = null;
+
         [Space]
         [SerializeField] private bool _allowDoubleJump, _allowDash, _allowCrouch;
 
@@ -28,13 +29,15 @@ namespace Game.Player
         public Vector2 LastDirection { get; private set; }
         public Transform ObstacleRayTransform { get; private set; }
 
-
         public event Action<bool> OnGroundedChanged;
+
         public event Action OnJumping, OnDoubleJumping;
+
         public event Action<bool> OnDashingChanged;
+
         public event Action<bool> OnCrouchingChanged;
 
-        void Awake()
+        private void Awake()
         {
             GatherInput();
             _rigidbody = GetComponent<Rigidbody2D>();
@@ -47,7 +50,7 @@ namespace Game.Player
 
         private void Update() => GatherInput();
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             _fixedFrame++;
             _frameClamp = _moveClamp;
@@ -68,12 +71,12 @@ namespace Game.Player
 
         private void OnEnable()
         {
-            //_targetSearcher.OnTargetLocked += OnTargetLocked;   
+            //_targetSearcher.OnTargetLocked += OnTargetLocked;
         }
 
         private void OnDisable()
         {
-           // _targetSearcher.OnTargetLocked -= OnTargetLocked;
+            // _targetSearcher.OnTargetLocked -= OnTargetLocked;
         }
 
         private void GatherInput()
@@ -102,16 +105,16 @@ namespace Game.Player
 
             //if(Input.ConsumeDown)
             //{
-                //ConsumeEnemy();
+            //ConsumeEnemy();
             //}
 
-            if(Input.X == 1)
+            if (Input.X == 1)
             {
                 ObstacleRayTransform = _obstacleRayRight;
                 LastDirection = new Vector2(1, 0);
             }
 
-            if(Input.X == -1)
+            if (Input.X == -1)
             {
                 ObstacleRayTransform = _obstacleRayLeft;
                 LastDirection = new Vector2(-1, 0);
@@ -122,6 +125,7 @@ namespace Game.Player
 
         [Header("COLLISION")]
         [SerializeField] private LayerMask _groundLayer;
+
         [SerializeField] private float _detectionRayLength = 0.1f;
         [SerializeField] private ContactFilter2D _filter;
         private readonly RaycastHit2D[] _hitsDown = new RaycastHit2D[1];
@@ -176,12 +180,13 @@ namespace Game.Player
             Gizmos.DrawWireCube(b.center, b.size);
         }
 
-        #endregion
+        #endregion Collisions
 
         #region Crouch
 
         [Header("CROUCH")]
         [SerializeField] private float _crouchSizeModifier = 0.5f;
+
         [SerializeField] private float _crouchSpeedModifier = 0.1f;
         [SerializeField] private int _crouchSlowdownFrames = 50;
         [SerializeField] private float _immediateCrouchSlowdownThreshold = 0.1f;
@@ -193,7 +198,7 @@ namespace Game.Player
 
         private bool CanStand => Physics2D.OverlapBox((Vector2)transform.position + _defaultColliderOffset, _defaultColliderSize * 0.95f, 0, _groundLayer) == null;
 
-        void CalculateCrouch()
+        private void CalculateCrouch()
         {
             if (!_allowCrouch)
                 return;
@@ -230,12 +235,13 @@ namespace Game.Player
             }
         }
 
-        #endregion
+        #endregion Crouch
 
         #region Horizontal
 
         [Header("WALKING")]
         [SerializeField] private float _acceleration = 120;
+
         [SerializeField] private float _moveClamp = 13;
         [SerializeField] private float _deceleration = 60f;
         [SerializeField] private float _apexBonus = 100;
@@ -250,7 +256,7 @@ namespace Game.Player
                 //Debug.Log("1" + _currentHorizontalSpeed);
 
                 _currentHorizontalSpeed = Mathf.Clamp(_currentHorizontalSpeed, -_frameClamp, _frameClamp);
-                
+
                 //Debug.Log("2" + _currentHorizontalSpeed);
                 var apexBonus = Mathf.Sign(Input.X) * _apexBonus * _apexPoint;
                 _currentHorizontalSpeed += apexBonus * Time.fixedDeltaTime;
@@ -267,12 +273,13 @@ namespace Game.Player
             }
         }
 
-        #endregion
+        #endregion Horizontal
 
         #region Gravity
 
         [Header("GRAVITY")]
         [SerializeField] private float _fallClamp = -60f;
+
         [SerializeField] private float _minFallSpeed = 80f;
         [SerializeField] private float _maxFallSpeed = 160f;
         [SerializeField] private float _groundedSpeed = -5;
@@ -300,11 +307,11 @@ namespace Game.Player
             }
         }
 
-        #endregion
+        #endregion Gravity
 
         #region Jump
 
-        [Header("JUMPING")] [SerializeField] private float _jumpHeight = 35;
+        [Header("JUMPING")][SerializeField] private float _jumpHeight = 35;
         [SerializeField] private float _jumpApexThreshold = 40f;
         [SerializeField] private int _coyoteTimeThreshold = 7;
         [SerializeField] private int _jumpBuffer = 7;
@@ -325,7 +332,6 @@ namespace Game.Player
         {
             if (!_grounded)
             {
-
                 _apexPoint = Mathf.InverseLerp(_jumpApexThreshold, 0, Mathf.Abs(_velocity.y));
                 _fallSpeed = Mathf.Lerp(_minFallSpeed, _maxFallSpeed, _apexPoint);
             }
@@ -363,16 +369,17 @@ namespace Game.Player
             if (!_grounded && !Input.JumpHeld && !_endedJumpEarly && _velocity.y > 0)
                 _endedJumpEarly = true;
 
-           // if (_hittingCeiling && _currentVerticalSpeed > 0)
+            // if (_hittingCeiling && _currentVerticalSpeed > 0)
             //    _currentVerticalSpeed = 0;
         }
 
-        #endregion
+        #endregion Jump
 
         #region Dash
 
         [Header("DASH")]
         [SerializeField] private float _dashPower = 30;
+
         [SerializeField] private int _dashLength = 6;
         [SerializeField] private float _dashEndHorizontalMultiplier = 0.25f;
         private float _startedDashing;
@@ -382,7 +389,7 @@ namespace Game.Player
         private bool _dashing;
         private bool _dashToConsume;
 
-        void CalculateDash(Vector2 vel, int dashLength)
+        private void CalculateDash(Vector2 vel, int dashLength)
         {
             if (!_allowDash)
                 return;
@@ -424,7 +431,7 @@ namespace Game.Player
             _dashToConsume = false;
         }
 
-        #endregion
+        #endregion Dash
 
         #region Move
 
@@ -432,7 +439,7 @@ namespace Game.Player
         {
             RawMovement = new Vector3(_currentHorizontalSpeed, _currentVerticalSpeed);
             var move = RawMovement * Time.fixedDeltaTime;
-            
+
             move -= EvaluateEffectors();
 
             _rigidbody.MovePosition(_rigidbody.position + (Vector2)move);
@@ -445,16 +452,16 @@ namespace Game.Player
         private Vector2 _lastPos;
         private bool _cornerStuck;
 
-        void RunCornerPrevention()
+        private void RunCornerPrevention()
         {
             _cornerStuck = !_grounded && _lastPos == _rigidbody.position && _lastJumpPressed + 1 < _fixedFrame;
             _currentVerticalSpeed = _cornerStuck ? 0 : _currentVerticalSpeed;
             _lastPos = _rigidbody.position;
         }
 
-        #endregion
+        #endregion Corner Stuck Prevention
 
-        #endregion
+        #endregion Move
 
         #region Effectors
 
@@ -477,28 +484,30 @@ namespace Game.Player
                     //if (hit2D.transform.TryGetComponent(out IPlayerEffector effector))
                     //{
                     //    if (_usedEffectors.Contains(effector)) continue;
-                     //   _usedEffectors.Add(effector);
-                     //   return effector.EvaluateEffector();
-                   // }
+                    //   _usedEffectors.Add(effector);
+                    //   return effector.EvaluateEffector();
+                    // }
                 }
 
                 return Vector3.zero;
             }
         }
 
-        #endregion
+        #endregion Effectors
 
         #region EnemyInteraction
 
         [Header("ConsumeEnemy")]
         //[SerializeField] private TargetSearcher _targetSearcher;
         [SerializeField] private float _distanceToAttack;
+
         [SerializeField] private float _upForce = 0.1f;
         [SerializeField] private Image _bloodScreen;
         [SerializeField] private int _bonusDistanceToKill;
 
         //private Enemy _target;
         private float _distanceToTarget;
+
         private WaitForSeconds _bleachBloodTimer = new WaitForSeconds(0.05f);
         private float _bleachAmount;
 
@@ -511,7 +520,7 @@ namespace Game.Player
         private void ConsumeEnemy()
         {
             _bleachAmount = 1;
-        
+
             if (_target != null && _allowDash && _crouching == false)
             {
                 if(_distanceToTarget > _distanceToAttack)
@@ -540,11 +549,11 @@ namespace Game.Player
             _bleachAmount -= 0.05f;
             Color bleacher = new Color(1, 0.55f, 0.55f, _bleachAmount);
             _bloodScreen.material.color = bleacher;
-            if (_bleachAmount >0 )
+            if (_bleachAmount > 0)
                 StartCoroutine(BleachBlood());
         }
 
-        #endregion
+        #endregion EnemyInteraction
 
         public void StopPlayer()
         {
