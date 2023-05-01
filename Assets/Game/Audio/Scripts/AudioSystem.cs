@@ -24,7 +24,7 @@ namespace Game.Audio.Scripts
                 _audioSource.clip = _menuSceneMusic;
             else
             {
-                _audioSource.clip = _levelSceneMusic[Random.Range(0,_levelSceneMusic.Length)];
+//                _audioSource.clip = _levelSceneMusic[Random.Range(0,_levelSceneMusic.Length)];
             }
 
             _audioSource.Play();
